@@ -8,20 +8,19 @@ import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 
-public class MainActivity extends AppCompatActivity {
+public class Main2Activity extends AppCompatActivity {
 
-    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = Main2Activity.class.getSimpleName();
 
     private Disposable disposable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        // observable
+        setContentView(R.layout.activity_main2);// observable
         Observable<String> animalsObservable = getAnimalsObservable();
 
         // observer
@@ -29,9 +28,15 @@ public class MainActivity extends AppCompatActivity {
 
         // observer subscribing to observable
         animalsObservable.
-                observeOn(Schedulers.io())
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .subscribe(animalsObserver);
+                subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .filter(new Predicate<String>() {
+                    @Override
+                    public boolean test(String s) throws Exception {
+                        return s.toLowerCase().startsWith("b");
+                    }
+                })
+                .subscribeWith(animalsObserver);
     }
 
     private Observable<String> getAnimalsObservable() {
@@ -43,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSubscribe(Disposable d) {
                 Log.d(TAG, "onSubscribe: ");
+                disposable = d;
             }
 
             @Override
